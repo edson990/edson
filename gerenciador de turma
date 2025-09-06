@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciador de Turma</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #f0f0f0; 
+      text-align: center; 
+    }
+    h1 { 
+      margin-bottom: 20px; 
+    }
+    button { 
+      margin: 5px; 
+      padding: 8px 12px; 
+      background: #4CAF50; 
+      color: white; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+    }
+    button:hover { 
+      background: #45a049; 
+    }
+    #saida { 
+      margin: 20px auto; 
+      padding: 10px; 
+      background: white; 
+      border: 1px solid #ccc; 
+      border-radius: 5px;
+      min-height: 50px; 
+      width: 400px; 
+      text-align: left; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerenciador de Turma</h1>
+
+  <button onclick="adicionarAluno()">1. Adicionar aluno</button>
+  <button onclick="listarAlunos()">2. Listar alunos</button>
+  <button onclick="registrarNotas()">3. Registrar notas</button>
+  <button onclick="calcularMediaAluno()">4. Calcular média</button>
+  <button onclick="mostrarAprovados()">5. Mostrar aprovados</button>
+  <button onclick="estatisticas()">6. Estatísticas</button>
+  <button onclick="ordenarPorMedia()">7. Ordenar por média</button>
+  <button onclick="removerAluno()">8. Remover aluno</button>
+  <button onclick="sair()">9. Sair</button>
+
+  <div id="saida">Escolha uma opção.</div>
+
+  <script>
+    let alunos = [];
+
+    function mostrar(texto) {
+      document.getElementById("saida").innerHTML = texto;
+    }
+
+    // Função para calcular média de um array de notas
+    function calcularMedia(notas) {
+      if (notas.length === 0) return 0;
+      let soma = 0;
+      for (let i = 0; i < notas.length; i++) {
+        soma += notas[i];
+      }
+      return soma / notas.length;
+    }
+
+    function adicionarAluno() {
+      let nome = prompt("Nome do aluno:");
+      if (!nome) return;
+      nome = nome.trim().toLowerCase();
+
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].nome.toLowerCase() === nome) {
+          mostrar("Esse aluno já existe.");
+          return;
+        }
+      }
+
+      alunos.push({ nome: nome, notas: [] });
+      mostrar("Aluno adicionado: " + nome);
+    }
+
+    function listarAlunos() {
+      if (alunos.length === 0) {
+        mostrar("Nenhum aluno cadastrado.");
+        return;
+      }
+      let texto = "";
+      for (let i = 0; i < alunos.length; i++) {
+        texto += alunos[i].nome + " (" + alunos[i].notas.length + " notas)<br>";
+      }
+      mostrar(texto);
+    }
+
+    function registrarNotas() {
+      let nome = prompt("Nome do aluno:");
+      if (!nome) return;
+      nome = nome.trim().toLowerCase();
+
+      let aluno = null;
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].nome.toLowerCase() === nome) {
+          aluno = alunos[i];
+        }
+      }
+      if (!aluno) { mostrar("Aluno não encontrado."); return; }
+
+      while (true) {
+        let entrada = prompt("Digite uma nota (0 a 10) ou -1 para parar:");
+        let nota = Number(entrada);
+        if (nota === -1) break;
+        if (nota >= 0 && nota <= 10) aluno.notas.push(nota);
+        else alert("Nota inválida!");
+      }
+      mostrar("Notas adicionadas para " + aluno.nome);
+    }
+
+    function calcularMediaAluno() {
+      let nome = prompt("Nome do aluno:");
+      if (!nome) return;
+      nome = nome.trim().toLowerCase();
+
+      let aluno = null;
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].nome.toLowerCase() === nome) aluno = alunos[i];
+      }
+      if (!aluno) { mostrar("Aluno não encontrado."); return; }
+      if (aluno.notas.length === 0) { mostrar("Esse aluno não tem notas."); return; }
+
+      let media = calcularMedia(aluno.notas);
+      mostrar("Média de " + aluno.nome + ": " + media.toFixed(2));
+    }
+
+    function mostrarAprovados() {
+      let texto = "";
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].notas.length > 0) {
+          let media = calcularMedia(alunos[i].notas);
+          if (media >= 7) texto += alunos[i].nome + " aprovado (média " + media.toFixed(2) + ")<br>";
+        }
+      }
+      if (texto === "") texto = "Nenhum aprovado.";
+      mostrar(texto);
+    }
+
+    function estatisticas() {
+      let qtd = 0, total = 0;
+      let maior = -1, menor = 11;
+      let nomeMaior = "", nomeMenor = "";
+
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].notas.length > 0) {
+          let media = calcularMedia(alunos[i].notas);
+          total += media;
+          qtd++;
+          if (media > maior) { maior = media; nomeMaior = alunos[i].nome; }
+          if (media < menor) { menor = media; nomeMenor = alunos[i].nome; }
+        }
+      }
+
+      if (qtd === 0) mostrar("Sem dados.");
+      else mostrar("Média geral: " + (total/qtd).toFixed(2) +
+                   "<br>Maior média: " + nomeMaior + " (" + maior.toFixed(2) + ")" +
+                   "<br>Menor média: " + nomeMenor + " (" + menor.toFixed(2) + ")");
+    }
+
+    function ordenarPorMedia() {
+      if (alunos.length === 0) { mostrar("Nenhum aluno cadastrado."); return; }
+
+      for (let i = 0; i < alunos.length; i++) {
+        for (let j = i + 1; j < alunos.length; j++) {
+          if (calcularMedia(alunos[j].notas) > calcularMedia(alunos[i].notas)) {
+            let temp = alunos[i];
+            alunos[i] = alunos[j];
+            alunos[j] = temp;
+          }
+        }
+      }
+
+      let texto = "";
+      for (let i = 0; i < alunos.length; i++) {
+        texto += alunos[i].nome + " (" + calcularMedia(alunos[i].notas).toFixed(2) + ")<br>";
+      }
+      mostrar(texto);
+    }
+
+    function removerAluno() {
+      let nome = prompt("Nome do aluno:");
+      if (!nome) return;
+      nome = nome.trim().toLowerCase();
+
+      let novos = [];
+      let removido = false;
+      for (let i = 0; i < alunos.length; i++) {
+        if (alunos[i].nome.toLowerCase() === nome) removido = true;
+        else novos.push(alunos[i]);
+      }
+      alunos = novos;
+      mostrar(removido ? "Aluno removido." : "Aluno não encontrado.");
+    }
+
+    function sair() {
+      mostrar("Programa encerrado.");
+    }
+  </script>
+</body>
+</html>
