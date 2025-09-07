@@ -58,7 +58,7 @@
       document.getElementById("saida").innerHTML = texto;
     }
 
-    // Função para calcular média de um array de notas
+ 
     function calcularMedia(notas) {
       if (notas.length === 0) return 0;
       let soma = 0;
